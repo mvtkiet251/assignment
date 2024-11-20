@@ -21,12 +21,18 @@ class Amenities:
     general: list[str]
     room: list[str]
 
+# Define a data class for hotel image
+@dataclass
+class Image:
+    link: str
+    description: str
+
 # Define a data class for hotel images
 @dataclass
 class Images:
-    rooms: list[str] = field(default_factory=list)
-    site: list[str] = field(default_factory=list)
-    amenities: list[str] = field(default_factory=list)
+    rooms: list[Image] = field(default_factory=list)
+    site: list[Image] = field(default_factory=list)
+    amenities: list[Image] = field(default_factory=list)
 
 # Define a data class for hotels
 @dataclass
@@ -100,10 +106,10 @@ class Acme(BaseSupplier):
 def paperflies_images_modify(images):
     """Format and clean image data from Paperflies supplier"""
     return [
-        {
-            'link': data['link'],
-            'description': data['caption']
-        }
+        Image(
+            link=data['link'],
+            description=data['caption']
+        )
         for data in images
     ]
 
@@ -141,10 +147,10 @@ class Paperflies(BaseSupplier):
 def patagonia_images_modify(images):
     """Format and clean image data from Patagonia supplier"""
     return [
-        {
-            'link': data['url'],
-            'description': data['description']
-        }
+        Image(
+            link=data['url'],
+            description=data['description']
+        )
         for data in images
     ]
 
@@ -259,8 +265,8 @@ class HotelsService:
         destination_ids_rev = {value: pos for pos, value in enumerate(destination_list)}
 
         ret = self.hotels[
-            (not hotel_list or self.hotels['id'].isin(hotel_list)) &
-            (not destination_list or self.hotels['destination_id'].isin(destination_list))
+            ((len(hotel_list) == 0) | self.hotels['id'].isin(hotel_list)) &
+            ((len(destination_list) == 0) | self.hotels['destination_id'].isin(destination_list))
         ]
         ret = json.loads(ret.to_json(orient='records'))
 
